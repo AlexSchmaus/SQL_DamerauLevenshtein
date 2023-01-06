@@ -4,8 +4,8 @@
 --
 
 -- The two strings to compare
-DECLARE @A varchar(256) = 'Alex Shmus'
-DECLARE @B varchar(256) = 'Alex Schmaus'
+DECLARE @A varchar(256) = 'an catd'--'Alex Shmus'
+DECLARE @B varchar(256) = 'a cat'--'Alex Schmaus'
 
 -- The output - how "different" are the strings?
 DECLARE @Distance int
@@ -33,13 +33,13 @@ SELECT
 FROM C6
 
 -- Create two tables, where each letter of the two strings has a row, a
-DECLARE @ATbl table (Letter varchar, Distance int)
-DECLARE @BTbl table (Letter varchar, Distance int)
+DECLARE @ATbl table (idx int, Letter varchar, Distance int)
+DECLARE @BTbl table (idx int, Letter varchar, Distance int)
 DECLARE @i int = 1
 
 WHILE @i <= @ALen BEGIN
 	INSERT INTO @Atbl
-	SELECT SUBSTRING(@A, @i, 1), NULL
+	SELECT @i, SUBSTRING(@A, @i, 1), NULL
 
 	SET @i += 1
 	END
@@ -47,14 +47,14 @@ WHILE @i <= @ALen BEGIN
 SET @i = 1
 WHILE @i <= @BLen BEGIN
 	INSERT INTO @BTbl
-	SELECT SUBSTRING(@B, @i, 1), NULL
+	SELECT @i, SUBSTRING(@B, @i, 1), NULL
 	
 	SET @i += 1
 	END
 
 
-SELECT * FROM @ATbl
-SELECT * FROM @BTbl
+--	SELECT * FROM @ATbl
+--	SELECT * FROM @BTbl
 
 DECLARE @MaxLen int
 SELECT @MaxLen = MAX(L) FROM (VALUES (@ALen),(@BLen)) AS src (L)
@@ -73,12 +73,28 @@ SELECT @MaxLen = MAX(L) FROM (VALUES (@ALen),(@BLen)) AS src (L)
 -- the D-L distance will then be the max distance, across the two tables
 -- Or..... that's the idea at any rate
 
+DECLARE @Bi char
+
+SET @Distance = 0
+
+
 SET @i = 1
 WHILE @i <= @MaxLen BEGIN
 	
-	-- Going to stop for the day here
-	SELECT @i
-	-- Going to stop for the day here
+	SET @Bi = (SELECT Letter FROM @BTbl WHERE idx = @i)
 	
+	SELECT
+		idx,
+		Letter,
+		Distance = CASE
+			WHEN Letter = @Bi THEN 0
+			WHEN Letter != @Bi THEN 1
+			END,
+		@Bi AS Bi,
+		@i AS i
+	FROM @ATbl
+		
 	SET @i += 1
 	END
+
+SELECT @Distance
